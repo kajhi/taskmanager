@@ -41,6 +41,7 @@
 
 <!-- jQuery -->
 <script src="<?=$this->baseUrl()?>plugins/bower_components/jquery/dist/jquery.min.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
 
 <style type="text/css">
    ul.board {
@@ -65,10 +66,12 @@
    .bg-blue {
     background: #0085ff !important;
    }
+   .myadmin-dd .dd-list .dd-item .dd-handle {
+      margin: 5px 0;
+   }
 </style>
-
 </head>
-<body>
+<body onload="shows_form_part(1)">
 <!-- Preloader -->
 <div class="preloader hidden-print">
   <div class="cssload-speeding-wheel"></div>
@@ -83,7 +86,7 @@
       <ul class="nav navbar-top-links navbar-right pull-right">
         
         <!-- /.dropdown -->
-        <li class="dropdown"> <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#"><img src="http://localhost:8080/plugins/images/users/avatar.png" alt="user-img" width="36" class="img-circle"> </a>
+        <li class="dropdown"> <a class="dropdown-toggle profile-pic" data-toggle="dropdown" href="#"><img src="<?=$this->baseUrl()?>plugins/images/users/avatar.png" alt="user-img" width="36" class="img-circle"> </a>
           <ul class="dropdown-menu dropdown-user animated flipInY">
             <li><a href="#"><i class="ti-user"></i> My Profile</a></li>
             <li><a href="#"><i class="fa fa-power-off"></i> Logout</a></li>
@@ -104,10 +107,8 @@
                     <button class="btn btn-default" type="button"> <i class="fa fa-search"></i> </button>
                     </span>
                 </div>
-            </li>  
-            <li><a href="#" class="waves-effect"><i class="ti-user fa-fw"></i> <span class="hide-menu">User<span class="fa arrow"></span></span></a>
-        <li><a href="/board/
-        " class="waves-effect"><i class="icon-list fa-fw"></i> <span class="hide-menu">Personal Task Manager <span class="fa arrow"></span></span></a>
+            </li> 
+        <li><a href="/board/" class="waves-effect"><i class="icon-list fa-fw"></i> <span class="hide-menu">Personal Task Manager <span class="fa arrow"></span></span></a>
     </div>
   </div>
 
@@ -136,15 +137,23 @@
               <label class="control-label"><?= $list->listname; ?></label>
                <div class="panel-action"><a href="#" data-perform="panel-collapse">
               <div class="myadmin-dd dd" id="nestable">
-                <ol class="dd-list">
+                <ol id="card-list" class="dd-list">
                   <li class="dd-item" data-id="1">
-                  <?php foreach ($cards as $card): ?>
-                    <div class="dd-handle"><?= $card->cardname; ?></div>
-                  <?php endforeach; ?>
+                      <?php foreach ($list->details as $card):
+                        ?>
+                          <div class="dd-handle" alt="default" data-toggle="modal" data-target="#myModal"><?= $card->cardname;?></div>
+                          <script>
+                            $(document).ready(function(){
+                                $("a.show-<?= $list->id; ?>").click(function(){
+                                    $(".lihat-<?= $list->id; ?>").toggle();
+                                });
+                            });
+                          </script>
+                      <?php endforeach; ?>
                   </li>
-                    <a class="btn btn-block btn-default m-t-10 collapseble">Add a List ...</a>
+                    <a class="btn btn-block btn-default m-t-10 show-<?= $list->id; ?>">Add a Card ...</a>
                     <form action="<?= $this->pathFor('save-card'); ?>" method="POST">
-                      <div class="m-t-15 collapseblebox dn" style="display: none;">
+                      <div class="m-t-15 lihat-<?= $list->id; ?> dn" style="display: none;">
                           <input type="text" name="board" value="<?php echo @$boards->id ?>" class="hidden">
                           <input type="text" name="idlist" class="hidden" value="<?= $list->id; ?>">
                           <textarea class="form-control form-control-line" name="cardname" rows="3"></textarea>
@@ -156,6 +165,13 @@
               </div>
             </div>
           </div>
+          <script>
+            $(document).ready(function(){
+                $("a.show-<?= $list->id; ?>").click(function(){
+                    $(".lihat-<?= $list->id; ?>").toggle();
+                });
+            });
+          </script>
         <?php endforeach; ?>
         <div class="col-sm-3 col-xs-12">
             <button type="button" class="btn btn-block btn-rounded btn-default showtop" data-target="#add-list" data-toggle="modal">Add a List ...</button>
@@ -166,7 +182,7 @@
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                        <h4 class="modal-title" id="myModalLabel">Add List</h4></div>
+                        <h4 class="modal-title" id="myModalLabel">Add a List</h4></div>
                     <div class="modal-body">
                         <form action="<?= $this->pathFor('save-list'); ?>" method="POST">
                             <div class="form-group">
@@ -176,8 +192,8 @@
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-info">Save</button>
+                            <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cancel</button>
                         </form>
-                        <button type="button" class="btn btn-default waves-effect" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
                 </div>
@@ -186,6 +202,26 @@
             <!-- /.modal-dialog -->
         </div>
 
+        <div class="col-md-4">
+          <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                  <h3 class="modal-title" id="myModalLabel" style="font-weight: bold;" class="fa fa-list-alt"><?= $card->cardname;?></h3>
+                </div>
+                <div class="modal-body">
+                  <h4>Overflowing text to show scroll behavior</h4>
+                  <p>Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Vivamus sagittis lacus vel augue laoreet rutrum faucibus dolor auctor.</p>
+                  <p>Aenean lacinia bibendum nulla sed consectetur. Praesent commodo cursus magna, vel scelerisque nisl consectetur et. Donec sed odio dui. Donec ullamcorper nulla non metus auctor fringilla.</p>
+                </div>
+                <!-- <div class="modal-footer">
+                  <button type="button" class="btn btn-info waves-effect" data-dismiss="modal">Close</button>
+                </div> -->
+              </div>
+            </div>
+          </div>
+        </div>
       <div class="right-sidebar">
         <div class="slimScrollDiv" style="position: relative; overflow: hidden; width: auto; height: 100%;"><div class="slimscrollright" style="overflow: hidden; width: auto; height: 100%;">
           <div class="rpanel-title"> Service Panel <span><i class="ti-close right-side-toggle"></i></span> </div>
